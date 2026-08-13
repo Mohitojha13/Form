@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Daily Plumbing Training Quality Assessment</title>
+<style>
+  :root{
+    --orange:#E07B1E;
+    --blue:#4472A8;
+    --dark:#222222;
+    --gray:#6B6B6B;
+    --bg:#F7F8FA;
+    --card:#FFFFFF;
+    --border:#E2E5E9;
+    --good:#2E9E5B;
+    --bad:#D64545;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Noto Sans','Nirmala UI',Arial,sans-serif;
+    background:var(--bg);
+    color:var(--dark);
+    padding-bottom:100px;
+  }
+  header{
+    background:var(--blue);
+    color:#fff;
+    padding:18px 16px 16px;
+    text-align:center;
+    position:sticky;
+    top:0;
+    z-index:20;
+  }
+  header .org{
+    font-size:12px;
+    letter-spacing:1.5px;
+    font-weight:700;
+    opacity:0.85;
+    margin-bottom:4px;
+  }
+  header h1{
+    margin:0;
+    font-size:18px;
+    font-weight:800;
+    line-height:1.3;
+  }
+  .langbar{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:12px;
+  }
+  .langbtn{
+    border:2px solid rgba(255,255,255,0.6);
+    background:transparent;
+    color:#fff;
+    padding:7px 16px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .langbtn.active{
+    background:var(--orange);
+    border-color:var(--orange);
+  }
+  main{
+    max-width:560px;
+    margin:0 auto;
+    padding:16px;
+  }
+  .sectiontitle{
+    font-size:13px;
+    font-weight:800;
+    color:var(--blue);
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin:18px 4px 8px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    color:var(--gray);
+    margin-bottom:6px;
+  }
+  .field input[type=text], .field input[type=tel], .field select{
+    width:100%;
+    padding:12px;
+    border:1.5px solid var(--border);
+    border-radius:10px;
+    font-size:16px;
+    font-family:inherit;
+    background:#fff;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  .select-wrap{position:relative;}
+  .select-wrap:after{
+    content:"▾";
+    position:absolute;
+    right:14px; top:50%;
+    transform:translateY(-50%);
+    color:var(--gray);
+    pointer-events:none;
+  }
+
+  .autochip{
+    border:1.5px dashed var(--border);
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+    font-size:13px;
+    margin-bottom:12px;
+  }
+  .autochip.datechip{
+    background:#F3F7FC;
+    border-style:solid;
+    border-color:var(--blue);
+  }
+  .autochip .ico{font-size:20px; display:block; margin-bottom:4px;}
+  .autochip .val{font-weight:800; color:var(--dark); font-size:13px; word-break:break-word;}
+  .autochip.datechip .val{font-size:18px;}
+  .autochip .status-ok{color:var(--good);}
+  .autochip .status-wait{color:var(--gray);}
+  .autochip .retry{
+    display:inline-block; margin-top:6px; font-size:12px; color:var(--blue); font-weight:700; cursor:pointer;
+  }
+
+  .photobox{
+    border:1.5px dashed var(--border);
+    border-radius:12px;
+    padding:14px;
+    text-align:center;
+  }
+  .photobox img{
+    max-width:100%;
+    max-height:180px;
+    border-radius:10px;
+    margin-top:10px;
+    display:block;
+    margin-left:auto; margin-right:auto;
+  }
+  .camerabtn{
+    display:inline-block;
+    background:var(--blue);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:24px;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    border:none;
+    margin:4px;
+  }
+  #cameraControls{display:flex; justify-content:center; flex-wrap:wrap;}
+
+  .qnum{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:26px;height:26px;
+    border-radius:50%;
+    background:var(--orange);
+    color:#fff;
+    font-size:13px;
+    font-weight:800;
+    margin-right:8px;
+    flex-shrink:0;
+  }
+  .qtext{
+    display:flex;
+    align-items:center;
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:12px;
+  }
+  .options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .options.cols3{grid-template-columns:1fr 1fr 1fr;}
+  .opt{
+    border:2px solid var(--border);
+    border-radius:12px;
+    padding:14px 8px;
+    text-align:center;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:700;
+    color:var(--dark);
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+  .opt.selected{
+    border-color:var(--good);
+    background:#EAF7EF;
+    color:var(--good);
+  }
+  .opt .tick{display:none; font-size:13px; margin-right:3px;}
+  .opt.selected .tick{display:inline;}
+
+  footer{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    background:#fff;
+    border-top:1px solid var(--border);
+    padding:12px 16px;
+    display:flex;
+    gap:10px;
+    z-index:20;
+  }
+  .btn{
+    flex:1;
+    padding:15px;
+    border-radius:12px;
+    border:none;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .btn-primary{background:var(--orange);color:#fff;}
+  .btn-secondary{background:var(--bg);color:var(--dark);border:1.5px solid var(--border);}
+
+  .toast{
+    position:fixed;
+    top:14px;left:50%;
+    transform:translateX(-50%) translateY(-60px);
+    background:var(--good);
+    color:#fff;
+    padding:12px 20px;
+    border-radius:10px;
+    font-weight:700;
+    font-size:14px;
+    z-index:50;
+    transition:transform .25s ease;
+    box-shadow:0 4px 14px rgba(0,0,0,0.2);
+    text-align:center;
+    max-width:90%;
+  }
+  .toast.error{background:var(--bad);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .savedcount{
+    text-align:center;
+    font-size:12px;
+    color:var(--gray);
+    margin:2px 0 8px;
+  }
+
+  .photo-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:100;
+    padding:16px;
+  }
+  .photo-modal-box{
+    width:100%;
+    max-width:560px;
+    background:#fff;
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 8px 30px rgba(0,0,0,.25);
+  }
+  .photo-modal-title{
+    font-size:17px;
+    font-weight:800;
+    text-align:center;
+    margin-bottom:12px;
+  }
+  .photo-option,.photo-cancel{
+    width:100%;
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    margin-top:8px;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:700;
+    background:#fff;
+    cursor:pointer;
+  }
+  .photo-option{
+    color:var(--dark);
+  }
+  .photo-cancel{
+    background:var(--bg);
+    color:var(--gray);
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="org">SMILE FOUNDATION</div>
+  <h1 id="title">Daily Plumbing Training Quality Assessment</h1>
+  <div class="langbar">
+    <button class="langbtn active" data-lang="en" onclick="setLang('en')">English</button>
+    <button class="langbtn" data-lang="hi" onclick="setLang('hi')">हिन्दी</button>
+    <button class="langbtn" data-lang="or" onclick="setLang('or')">ଓଡ଼ିଆ</button>
+  </div>
+</header>
+
+<main>
+  <div class="sectiontitle" id="sec_details">Today's Training</div>
+  <div class="card">
+    <div class="field">
+      <label id="lbl_name">Name of Participant</label>
+      <input type="text" id="in_name" placeholder="">
+    </div>
+    <div class="field">
+      <label id="lbl_mobile">Mobile Number</label>
+      <input type="tel" id="in_mobile" placeholder="" maxlength="10">
+    </div>
+    <div class="field">
+      <label id="lbl_state">State</label>
+      <div class="select-wrap">
+        <select id="in_state"></select>
+      </div>
+    </div>
+    <div class="field">
+      <label id="lbl_trainer">Name Of Trainer</label>
+      <div class="select-wrap">
+        <select id="in_trainer"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="sectiontitle" id="sec_feedback">Overall Feedback</div>
+  <div id="questions"></div>
+
+  
+  <div class="sectiontitle" id="sec_optional">Location & Photo</div>
+  <div class="card">
+    <div class="autochip datechip">
+      <span class="ico">📅</span>
+      <div id="lbl_date_chip">Date</div>
+      <div class="val" id="val_date">--</div>
+      <div id="lbl_time_chip" style="margin-top:8px;">Time</div>
+      <div class="val" id="val_time">--</div>
+    </div>
+
+    <div class="autochip locchip">
+      <span class="ico">📍</span>
+      <div id="lbl_loc_chip">Location (Latitude, Longitude)</div>
+      <div id="lbl_loc_hint" style="font-size:11px;color:var(--gray);margin-top:2px;">Tap "Allow" when your browser asks for location access</div>
+      <div class="val status-wait" id="val_loc">Fetching…</div>
+      <span class="retry" id="retry_loc" onclick="captureLocation()">↻ Retry</span>
+    </div>
+
+    <div class="photobox">
+      <div id="lbl_photo">Photo (Optional)</div>
+      <div id="photoStatus" style="font-size:12px;color:var(--gray);margin:6px 0 8px;">You can submit without a photo.</div>
+      <button type="button" class="camerabtn" id="btn_photo" onclick="openPhotoOptions()">📷 Add Photo</button>
+      <button type="button" class="camerabtn" id="btn_remove_photo" onclick="removePhoto()" style="display:none;background:#D64545;">✕ Remove Photo</button>
+      <img id="photoPreview" style="display:none;max-width:100%;max-height:180px;border-radius:10px;margin:10px auto 0;">
+      <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="handlePhotoFile(event)">
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoFile(event)">
+    </div>
+  </div>
+
+  <div id="photoModal" class="photo-modal" style="display:none;" onclick="closePhotoOptions(event)">
+    <div class="photo-modal-box" onclick="event.stopPropagation()">
+      <div class="photo-modal-title" id="photoModalTitle">Add Photo</div>
+      <button type="button" class="photo-option" onclick="chooseGallery()">🖼️ Upload from Gallery</button>
+      <button type="button" class="photo-option" onclick="chooseCamera()">📷 Take Photo with Camera</button>
+      <button type="button" class="photo-cancel" onclick="closePhotoOptions()">Cancel</button>
+    </div>
+  </div>
+
+<div class="savedcount" id="savedCount"></div>
+</main>
+
+<footer>
+  <button class="btn btn-secondary" onclick="resetForm()" id="btn_reset">Reset</button>
+  <button class="btn btn-primary" onclick="submitForm()" id="btn_submit">Save Feedback</button>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TXT = {
+  en: {
+    title: "Daily Plumbing Training Quality Assessment",
+    sec_auto: "Auto-captured", sec_details: "Today's Training", sec_feedback: "Overall Feedback", sec_optional: "Location & Photo",
+    date_chip: "Date", time_chip: "Time", loc_chip: "Location (Latitude, Longitude)", photo: "Photo (Optional)", addPhoto: "📷 Add Photo", removePhoto: "✕ Remove Photo", photoModalTitle: "Add Photo", gallery: "🖼️ Upload from Gallery", camera: "📷 Take Photo with Camera", cancel: "Cancel", photoOptional: "You can submit without a photo.",
+    cameraFail: "Could not access camera. Please allow camera permission.",
+    name: "Name of Participant", mobile: "Mobile Number", state: "State", trainer: "Name Of Trainer",
+    reset: "Reset", submit: "Save Feedback",
+    saved: "Saved! Ready for next person.",
+    incomplete: "Please answer all required fields.",
+    locWait: "Fetching…", locFail: "Location unavailable — tap retry",
+    locHint: 'Tap "Allow" when your browser asks for location access',
+    count: (n) => n + " feedback(s) saved this session — tap Download below.",
+    download: "Download All (CSV)",
+  },
+  hi: {
+    title: "दैनिक प्लंबिंग प्रशिक्षण गुणवत्ता मूल्यांकन",
+    sec_auto: "ऑटो-कैप्चर", sec_details: "आज का प्रशिक्षण", sec_feedback: "समग्र प्रतिक्रिया", sec_optional: "स्थान और फोटो",
+    date_chip: "तारीख", time_chip: "समय", loc_chip: "स्थान (अक्षांश, देशांतर)", photo: "फोटो (वैकल्पिक)", addPhoto: "📷 फोटो जोड़ें", removePhoto: "✕ फोटो हटाएं", photoModalTitle: "फोटो जोड़ें", gallery: "🖼️ गैलरी से फोटो चुनें", camera: "📷 कैमरा से फोटो लें", cancel: "रद्द करें", photoOptional: "आप बिना फोटो के भी फॉर्म जमा कर सकते हैं।",
+    cameraFail: "कैमरा एक्सेस नहीं मिला। कृपया कैमरा परमिशन Allow करें।",
+    name: "प्रतिभागी का नाम", mobile: "मोबाइल नंबर", state: "राज्य", trainer: "ट्रेनर का नाम",
+    reset: "रीसेट", submit: "फीडबैक सेव करें",
+    saved: "सेव हो गया! अगले व्यक्ति के लिए तैयार।",
+    incomplete: "कृपया सभी आवश्यक फ़ील्ड भरें।",
+    locWait: "प्राप्त हो रहा है…", locFail: "स्थान नहीं मिला — रीट्राई दबाएं",
+    locHint: 'ब्राउज़र पूछे तो "Allow" दबाएं ताकि स्थान मिल सके',
+    count: (n) => n + " फीडबैक इस सेशन में सेव हुए — नीचे डाउनलोड दबाएं।",
+    download: "सभी डाउनलोड करें (CSV)",
+  },
+  or: {
+    title: "ଦୈନିକ ପ୍ଲମ୍ବିଂ ତାଲିମ ଗୁଣାତ୍ମକ ମୂଲ୍ୟାୟନ",
+    sec_auto: "ଅଟୋ-କ୍ୟାପଚର୍", sec_details: "ଆଜିର ତାଲିମ", sec_feedback: "ସାମଗ୍ରିକ ମତାମତ", sec_optional: "ସ୍ଥାନ ଏବଂ ଫଟୋ",
+    date_chip: "ତାରିଖ", time_chip: "ସମୟ", loc_chip: "ସ୍ଥାନ (ଅକ୍ଷାଂଶ, ଦ୍ରାଘିମା)", photo: "ଫଟୋ (ବୈକଳ୍ପିକ)", addPhoto: "📷 ଫଟୋ ଯୋଡନ୍ତୁ", removePhoto: "✕ ଫଟୋ ହଟାନ୍ତୁ", photoModalTitle: "ଫଟୋ ଯୋଡନ୍ତୁ", gallery: "🖼️ ଗ୍ୟାଲେରୀରୁ ଫଟୋ ବାଛନ୍ତୁ", camera: "📷 କ୍ୟାମେରାରେ ଫଟୋ ନିଅନ୍ତୁ", cancel: "ବାତିଲ୍", photoOptional: "ଆପଣ ଫଟୋ ବିନା ମଧ୍ୟ ଫର୍ମ ଦାଖଲ କରିପାରିବେ।",
+    cameraFail: "କ୍ୟାମେରା ଆକ୍ସେସ୍ ମିଳିଲା ନାହିଁ। ଦୟାକରି କ୍ୟାମେରା ପରମିସନ୍ Allow କରନ୍ତୁ।",
+    name: "ଅଂଶଗ୍ରହଣକାରୀଙ୍କ ନାମ", mobile: "ମୋବାଇଲ୍ ନମ୍ବର", state: "ରାଜ୍ୟ", trainer: "ପ୍ରଶିକ୍ଷକଙ୍କ ନାମ",
+    reset: "ରିସେଟ୍", submit: "ମତାମତ ସେଭ୍ କରନ୍ତୁ",
+    saved: "ସେଭ୍ ହେଲା! ପରବର୍ତ୍ତୀ ବ୍ୟକ୍ତି ପାଇଁ ପ୍ରସ୍ତୁତ।",
+    incomplete: "ଦୟାକରି ସବୁ ଆବଶ୍ୟକ ସ୍ଥାନ ପୂରଣ କରନ୍ତୁ।",
+    locWait: "ଖୋଜୁଛି…", locFail: "ସ୍ଥାନ ମିଳିଲା ନାହିଁ — ପୁନଃ ଚେଷ୍ଟା କରନ୍ତୁ",
+    locHint: 'ବ୍ରାଉଜର୍ ପଚାରିଲେ "Allow" ଦବାନ୍ତୁ',
+    count: (n) => n + " ମତାମତ ଏହି ସେସନ୍‌ରେ ସେଭ୍ ହୋଇଛି — ତଳେ ଡାଉନଲୋଡ୍ ଦବାନ୍ତୁ।",
+    download: "ସବୁ ଡାଉନଲୋଡ୍ କରନ୍ତୁ (CSV)",
+  }
+};
+
+const STATES = [
+  { en: "Jharkhand", hi: "झारखंड", or: "ଝାଡ଼ଖଣ୍ଡ" },
+  { en: "Odisha", hi: "ओडिशा", or: "ଓଡ଼ିଶା" },
+];
+const TRAINERS = ["Omprakash Bharti", "Prashant Kumar", "Lokanath Patra"];
+
+const QUESTIONS = [
+  {
+    id: "q1", type: "single", cols: 2,
+    text: { en: "Did you understand today's topic?", hi: "क्या आपको आज का विषय समझ में आया?", or: "ଆଜିର ବିଷୟ ଆପଣ ବୁଝିଲେ କି?" },
+    options: [
+      { en: "Very well", hi: "पूरी तरह", or: "ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ" },
+      { en: "Well", hi: "ठीक-ठाक", or: "ଭଲ ଭାବରେ" },
+      { en: "Somewhat", hi: "थोड़ा बहुत", or: "କିଛି ପରିମାଣରେ" },
+      { en: "Not at all", hi: "बिल्कुल नहीं", or: "ମୋଟେ ନାହିଁ" },
+    ]
+  },
+  {
+    id: "q2", type: "single", cols: 2,
+    text: { en: "Did the trainer demonstrate the plumbing work properly?", hi: "क्या ट्रेनर ने प्लंबिंग का काम सही तरीके से दिखाया?", or: "ପ୍ରଶିକ୍ଷକ ପ୍ଲମ୍ବିଂ କାର୍ଯ୍ୟ ଠିକ୍ ଭାବରେ ଦେଖାଇଲେ କି?" },
+    options: [
+      { en: "Very easy", hi: "बहुत आसान", or: "ବହୁତ ସହଜ" },
+      { en: "Easy", hi: "आसान", or: "ସହଜ" },
+      { en: "Average", hi: "औसत", or: "ମଧ୍ୟମ" },
+      { en: "Difficult", hi: "कठिन", or: "କଠିନ" },
+    ]
+  },
+  {
+    id: "q3", type: "single", cols: 3,
+    text: { en: "Did you get enough practical / hands-on practice today?", hi: "क्या आपको आज पर्याप्त प्रैक्टिकल अभ्यास मिला?", or: "ଆଜି ଆପଣ ପର୍ଯ୍ୟାପ୍ତ ପ୍ରାୟୋଗିକ ଅଭ୍ୟାସ ପାଇଲେ କି?" },
+    options: [
+      { en: "Yes", hi: "हाँ", or: "ହଁ" },
+      { en: "Somewhat", hi: "थोड़ा बहुत", or: "କିଛି ପରିମାଣରେ" },
+      { en: "No", hi: "नहीं", or: "ନା" },
+    ]
+  },
+  {
+    id: "q4", type: "single", cols: 2,
+    text: { en: "How would you rate today's training?", hi: "आज की ट्रेनिंग को आप कैसे रेट करेंगे?", or: "ଆଜିର ତାଲିମକୁ ଆପଣ କିପରି ମୂଲ୍ୟାୟନ କରିବେ?" },
+    options: [
+      { en: "Excellent", hi: "उत्कृष्ट", or: "ଉତ୍କୃଷ୍ଟ" },
+      { en: "Good", hi: "अच्छा", or: "ଭଲ" },
+      { en: "Average", hi: "औसत", or: "ମଧ୍ୟମ" },
+      { en: "Poor", hi: "खराब", or: "ଖରାପ" },
+    ]
+  },
+  {
+    id: "q5", type: "multi", cols: 3,
+    text: { en: "What do you like most about today's Training?", hi: "आज के प्रशिक्षण में आपको सबसे ज्यादा क्या पसंद आया?", or: "ଆଜିର ତାଲିମରେ ଆପଣଙ୍କୁ ସବୁଠାରୁ ଅଧିକ କଣ ପସନ୍ଦ ହେଲା?" },
+    options: [
+      { en: "Video", hi: "वीडियो", or: "ଭିଡିଓ" },
+      { en: "Practical session", hi: "प्रैक्टिकल सेशन", or: "ପ୍ରାୟୋଗିକ ଅଧିବେଶନ" },
+      { en: "Trainer's explanation", hi: "ट्रेनर की व्याख्या", or: "ପ୍ରଶିକ୍ଷକଙ୍କ ବ୍ୟାଖ୍ୟା" },
+    ]
+  },
+  {
+    id: "q6", type: "single", cols: 3,
+    text: { en: "Would you recommend this training to another person?", hi: "क्या आप इस ट्रेनिंग की सिफारिश किसी और को करेंगे?", or: "ଆପଣ ଏହି ତାଲିମକୁ ଅନ୍ୟ କାହାକୁ ସୁପାରିଶ କରିବେ କି?" },
+    options: [
+      { en: "Yes", hi: "हाँ", or: "ହଁ" },
+      { en: "Maybe", hi: "शायद", or: "ହୋଇପାରେ" },
+      { en: "No", hi: "नहीं", or: "ନା" },
+    ]
+  },
+  {
+    id: "q7", type: "single", cols: 3,
+    text: { en: "Did this training help you learn new skills?", hi: "क्या इस ट्रेनिंग से आपको नए कौशल सीखने में मदद मिली?", or: "ଏହି ତାଲିମ ଆପଣଙ୍କୁ ନୂଆ ଦକ୍ଷତା ଶିଖିବାରେ ସାହାଯ୍ୟ କଲା କି?" },
+    options: [
+      { en: "Yes", hi: "हाँ", or: "ହଁ" },
+      { en: "Maybe", hi: "शायद", or: "ହୋଇପାରେ" },
+      { en: "No", hi: "नहीं", or: "ନା" },
+    ]
+  },
+];
+
+let currentLang = "en";
+let answers = {};
+let capturedDate = "";
+let capturedLoc = null;
+let savedEntries = [];
+let photoDataUrl = "";
+let photoBlob = null;
+
+function pad(n){ return n < 10 ? "0"+n : ""+n; }
+
+function captureDate(){
+  const d = new Date();
+  capturedDate = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+// Live, read-only date & time display shown above Location.
+// Auto-updates every second; not editable by the user in any way.
+function updateLiveDateTime(){
+  const d = new Date();
+  const dateStr = `${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`;
+  let hours = d.getHours();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  if(hours === 0) hours = 12;
+  const timeStr = `${pad(hours)}:${pad(d.getMinutes())} ${ampm}`;
+  const dateEl = document.getElementById("val_date");
+  const timeEl = document.getElementById("val_time");
+  if(dateEl) dateEl.textContent = dateStr;
+  if(timeEl) timeEl.textContent = timeStr;
+}
+setInterval(updateLiveDateTime, 1000);
+
+function captureLocation(){
+  const el = document.getElementById("val_loc");
+  el.className = "val status-wait";
+  el.textContent = TXT[currentLang].locWait;
+  if(!navigator.geolocation){
+    el.className = "val status-wait";
+    el.textContent = TXT[currentLang].locFail;
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      capturedLoc = { lat: pos.coords.latitude.toFixed(6), lon: pos.coords.longitude.toFixed(6) };
+      el.className = "val status-ok";
+      el.textContent = capturedLoc.lat + ", " + capturedLoc.lon;
+    },
+    () => {
+      capturedLoc = null;
+      el.className = "val status-wait";
+      el.textContent = TXT[currentLang].locFail;
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+}
+
+function populateSelects(){
+  const stateSel = document.getElementById("in_state");
+  const prevState = stateSel.value;
+  stateSel.innerHTML = "";
+  STATES.forEach((s) => {
+    const o = document.createElement("option");
+    o.value = s.en;
+    o.textContent = s[currentLang];
+    stateSel.appendChild(o);
+  });
+  if(prevState) stateSel.value = prevState;
+
+  const trainerSel = document.getElementById("in_trainer");
+  const prevTrainer = trainerSel.value;
+  trainerSel.innerHTML = "";
+  TRAINERS.forEach((t) => {
+    const o = document.createElement("option");
+    o.value = t;
+    o.textContent = t;
+    trainerSel.appendChild(o);
+  });
+  if(prevTrainer) trainerSel.value = prevTrainer;
+}
+
+function renderQuestions(){
+  const container = document.getElementById("questions");
+  container.innerHTML = "";
+  QUESTIONS.forEach((q, idx) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const qtext = document.createElement("div");
+    qtext.className = "qtext";
+    qtext.innerHTML = `<span class="qnum">${idx+1}</span><span>${q.text[currentLang]}</span>`;
+    card.appendChild(qtext);
+
+    const opts = document.createElement("div");
+    opts.className = "options" + (q.cols === 3 ? " cols3" : "");
+    q.options.forEach((opt) => {
+      const isSelected = q.type === "multi"
+        ? (answers[q.id] || []).includes(opt.en)
+        : answers[q.id] === opt.en;
+      const el = document.createElement("div");
+      el.className = "opt" + (isSelected ? " selected" : "");
+      el.innerHTML = `<span class="tick">✓</span>${opt[currentLang]}`;
+      el.onclick = () => {
+        if(q.type === "multi"){
+          const arr = answers[q.id] || [];
+          const i = arr.indexOf(opt.en);
+          if(i >= 0) arr.splice(i,1); else arr.push(opt.en);
+          answers[q.id] = arr;
+        } else {
+          answers[q.id] = opt.en;
+        }
+        renderQuestions();
+      };
+      opts.appendChild(el);
+    });
+    card.appendChild(opts);
+    container.appendChild(card);
+  });
+}
+
+function setLang(lang){
+  currentLang = lang;
+  document.querySelectorAll(".langbtn").forEach(b => {
+    b.classList.toggle("active", b.dataset.lang === lang);
+  });
+  const t = TXT[lang];
+  document.getElementById("title").textContent = t.title;
+  document.getElementById("sec_details").textContent = t.sec_details;
+  document.getElementById("sec_feedback").textContent = t.sec_feedback;
+  document.getElementById("sec_optional").textContent = t.sec_optional || "Location & Photo";
+  document.getElementById("lbl_date_chip").textContent = t.date_chip;
+  document.getElementById("lbl_time_chip").textContent = t.time_chip;
+  document.getElementById("lbl_loc_chip").textContent = t.loc_chip;
+  document.getElementById("lbl_loc_hint").textContent = t.locHint;
+  document.getElementById("lbl_photo").textContent = t.photo;
+  document.getElementById("btn_photo").textContent = t.addPhoto;
+  document.getElementById("btn_remove_photo").textContent = t.removePhoto;
+  document.getElementById("photoModalTitle").textContent = t.photoModalTitle;
+  document.querySelector(".photo-option:nth-of-type(1)").textContent = t.gallery;
+  document.querySelector(".photo-option:nth-of-type(2)").textContent = t.camera;
+  document.querySelector(".photo-cancel").textContent = t.cancel;
+  document.getElementById("photoStatus").textContent = photoDataUrl ? "Photo selected." : t.photoOptional;
+  document.getElementById("lbl_name").textContent = t.name;
+  document.getElementById("lbl_mobile").textContent = t.mobile;
+  document.getElementById("lbl_state").textContent = t.state;
+  document.getElementById("lbl_trainer").textContent = t.trainer;
+  document.getElementById("btn_reset").textContent = t.reset;
+  document.getElementById("btn_submit").textContent = t.submit;
+  if(document.getElementById("val_loc").classList.contains("status-wait") && !capturedLoc){
+    document.getElementById("val_loc").textContent = t.locWait;
+  }
+  populateSelects();
+  renderQuestions();
+  renderSavedCount();
+}
+
+function showToast(msg, isError){
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.className = "toast show" + (isError ? " error" : "");
+  setTimeout(() => toast.classList.remove("show"), 2400);
+}
+
+
+function openPhotoOptions(){
+  document.getElementById("photoModal").style.display = "flex";
+}
+
+function closePhotoOptions(event){
+  if(event && event.target !== event.currentTarget) return;
+  document.getElementById("photoModal").style.display = "none";
+}
+
+function chooseGallery(){
+  closePhotoOptions();
+  document.getElementById("galleryInput").click();
+}
+
+function chooseCamera(){
+  closePhotoOptions();
+  document.getElementById("cameraInput").click();
+}
+
+function handlePhotoFile(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+
+  if(!file.type.startsWith("image/")){
+    showToast("Please select an image.", true);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const maxWidth = 1280;
+      const scale = Math.min(1, maxWidth / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      photoDataUrl = canvas.toDataURL("image/jpeg", 0.78);
+      photoBlob = file;
+
+      const preview = document.getElementById("photoPreview");
+      preview.src = photoDataUrl;
+      preview.style.display = "block";
+
+      document.getElementById("btn_remove_photo").style.display = "inline-block";
+      document.getElementById("photoStatus").textContent = "Photo selected. You can still submit without it by removing it.";
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto(){
+  photoDataUrl = "";
+  photoBlob = null;
+  document.getElementById("photoPreview").src = "";
+  document.getElementById("photoPreview").style.display = "none";
+  document.getElementById("btn_remove_photo").style.display = "none";
+  document.getElementById("galleryInput").value = "";
+  document.getElementById("cameraInput").value = "";
+  document.getElementById("photoStatus").textContent = TXT[currentLang].photoOptional;
+}
+
+async function submitForm(){
+  const name = document.getElementById("in_name").value.trim();
+  const mobile = document.getElementById("in_mobile").value.trim();
+
+  const answeredCount = QUESTIONS.filter(q => {
+    const a = answers[q.id];
+    return q.type === "multi" ? (a && a.length > 0) : !!a;
+  }).length;
+
+  if(!name || !mobile || answeredCount < QUESTIONS.length){
+    showToast(TXT[currentLang].incomplete, true);
+    return;
+  }
+
+  const entry = {
+    date: capturedDate,
+    location: capturedLoc ? (capturedLoc.lat + "," + capturedLoc.lon) : "",
+    name: name,
+    mobile: mobile,
+    state: document.getElementById("in_state").value,
+    trainer: document.getElementById("in_trainer").value
+  };
+
+  QUESTIONS.forEach(q => {
+    const a = answers[q.id];
+    entry[q.id] = Array.isArray(a) ? a.join("; ") : a;
+  });
+
+  const submitBtn = document.getElementById("btn_submit");
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Saving...";
+
+  try {
+    const result = await new Promise((resolve, reject) => {
+      google.script.run
+        .withSuccessHandler(resolve)
+        .withFailureHandler(reject)
+        .saveFeedback({
+          date: entry.date,
+          location: entry.location,
+          name: entry.name,
+          mobile: entry.mobile,
+          state: entry.state,
+          trainer: entry.trainer,
+          q1: entry.q1 || "",
+          q2: entry.q2 || "",
+          q3: entry.q3 || "",
+          q4: entry.q4 || "",
+          q5: entry.q5 || "",
+          q6: entry.q6 || "",
+          q7: entry.q7 || "",
+          photoDataUrl: photoDataUrl || "",
+          photoMimeType: photoBlob && photoBlob.type ? photoBlob.type : "image/jpeg"
+        });
+    });
+
+    if(result && result.success){
+savedEntries.push(entry);
+
+      showToast(TXT[currentLang].saved, false);
+      resetForm(true);
+      renderSavedCount();
+    } else {
+      throw new Error((result && result.message) || "Could not save feedback.");
+    }
+
+  } catch(err) {
+    console.error(err);
+    showToast("Could not save. Please try again.", true);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+}
+
+function resetForm(clearInputs){
+  answers = {};
+  removePhoto();
+
+  if(clearInputs !== false){
+    document.getElementById("in_name").value = "";
+    document.getElementById("in_mobile").value = "";
+  }
+
+  captureLocation();
+  renderQuestions();
+}
+
+function renderSavedCount(){
+  const el = document.getElementById("savedCount");
+  if(savedEntries.length === 0){ el.innerHTML = ""; return; }
+  el.innerHTML = TXT[currentLang].count(savedEntries.length) +
+    ` <br><a href="#" onclick="downloadCSV();return false;" style="color:var(--blue);font-weight:700;">${TXT[currentLang].download}</a>`;
+}
+
+function downloadCSV(){
+  const headers = ["Date","Location(lat,lon)","Name","Mobile","State","Trainer",
+    "Q1_Understood","Q2_TrainerDemo","Q3_Practical","Q4_Rating","Q5_LikedMost","Q6_Recommend","Q7_LearnedSkills"];
+  const rows = savedEntries.map(e => [
+    e.date, e.location, e.name, e.mobile, e.state, e.trainer,
+    e.q1, e.q2, e.q3, e.q4, e.q5, e.q6, e.q7
+  ].map(v => `"${(v||"").toString().replace(/"/g,'""')}"`).join(","));
+  const csv = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Plumbing_Training_Feedback_" + capturedDate + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+captureDate();
+captureLocation();
+populateSelects();
+renderQuestions();
+updateLiveDateTime();
+</script>
+
+</body>
+</html>
